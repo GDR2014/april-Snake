@@ -49,6 +49,7 @@
      <Compile Include="Assets\Scripts\Cell.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
      <Compile Include="Assets\Scripts\GameProperties.cs" />
+     <Compile Include="Assets\Scripts\Snake.cs" />
      <Compile Include="Assets\Scripts\Tile.cs" />
      <Compile Include="Assets\Scripts\World.cs" />
   </ItemGroup>
