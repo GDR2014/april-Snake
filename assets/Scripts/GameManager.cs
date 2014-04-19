@@ -2,7 +2,9 @@
 
 public class GameManager : MonoBehaviour {
 
+    public float MinDelay = .15f, MaxDelay = 1.5f;
     public float StepDelay = 1.0f;
+    public int Score = 0;
 
     void Start () {}
     

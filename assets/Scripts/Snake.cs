@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace Assets.Scripts {
 
-    public class Snake : World.IWorldStepper{
+    public class Snake : World.IWorldStepper {
 
         public enum Direction { UP, DOWN, LEFT, RIGHT }
 
@@ -13,12 +14,15 @@ namespace Assets.Scripts {
         private Queue<Tile> snakeSegments; // TODO: Consider changing to a queue of Vectors
         private int supposedSize;
 
+        private World world;
+
         public Snake( Vector2 startPos, Direction startDir, int startSize, World world ) {
             snakeSegments = new Queue<Tile>();
             headPos = startPos;
             snakeSegments.Enqueue(world[headPos]);
             supposedSize = startSize;
             nextDirection = currentDirection = startDir;
+            this.world = world;
         }
 
         public bool TurnTo( Direction dir ) {
@@ -39,23 +43,45 @@ namespace Assets.Scripts {
                 case Direction.RIGHT: headPos.x++; break;
                 default: throw new ArgumentOutOfRangeException();
             }
-            bool withinBounds = checkBounds( world );
-            if ( !withinBounds ) { world.GameManager.GameOver( world, previousPosition ); return; }
+            Cell cellAtHead = checkNewHeadPosition();
+            Debug.Log(cellAtHead);
+            bool isGameOver = !handleNewCell(cellAtHead);
+            if( isGameOver ) { world.GameManager.GameOver(world, previousPosition); return;}
             Tile oldHead = world[previousPosition];
             Tile newHead = world[headPos];
             snakeSegments.Enqueue( newHead );
-            // oldHead.changeTypeTo(Cell.Body);
-            oldHead.renderer.material.color = GameProperties.COLOR_CELL_BODY;
-            newHead.changeTypeTo(Cell.Head);
+            oldHead.changeTypeTo(Cell.Body, false);
+            newHead.changeTypeTo(Cell.Head, true);
             bool shouldGrow = snakeSegments.Count < supposedSize;
             if( shouldGrow ) return;
             Tile tail = snakeSegments.Dequeue();
-            tail.changeTypeTo(Cell.Empty);
+            tail.changeTypeTo(Cell.Empty, true);
         }
 
-        private bool checkBounds(World world) {
-            return !(headPos.x < 0 || headPos.x >= world.width
-                  || headPos.y < 0 || headPos.y >= world.height);
+        private Cell checkNewHeadPosition() {
+            if( headPos.x < 0 || headPos.x >= world.width
+               || headPos.y < 0 || headPos.y >= world.height) return Cell.Wall;
+            return world[headPos].Type;
+        }
+
+        // Returns true if the next cell is valid; false if it's invalid
+        private bool handleNewCell( Cell c ) {
+            switch( c ) {
+                case Cell.Head:
+                    return true;
+                case Cell.Body:
+                case Cell.Wall:
+                    return false;
+                case Cell.Pellet:
+                    world.GameManager.Score++;
+                    world.GameManager.StepDelay = world.GameManager.StepDelay - 0.05f < world.GameManager.MinDelay ? world.GameManager.MinDelay : world.GameManager.StepDelay - 0.05f; // TODO: Fix this.
+                    break;
+                case Cell.Empty:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException( "c" );
+            }
+            return true;
         }
 
         private bool isDirectionVertical( Direction dir ) {

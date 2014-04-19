@@ -17,9 +17,14 @@ public class Tile : MonoBehaviour {
     
     void Update () {}
 
-    public void changeTypeTo( Cell cell ) {
-        StopAllCoroutines();
-        StartCoroutine( changeTypeCoroutine( cell ) );
+    public void changeTypeTo( Cell cell, bool animate ) {
+        if ( animate ) { 
+            StopAllCoroutines();
+            StartCoroutine( changeTypeCoroutine( cell ) );
+            return;
+        }
+        Type = cell;
+        renderer.material.color = GameProperties.GetCellColor( Type );
     }
 
     private IEnumerator changeTypeCoroutine( Cell type ) {
@@ -39,29 +44,5 @@ public class Tile : MonoBehaviour {
             yield return null;
         }
         transform.localScale = targetSize;
-    }
-
-    void OnMouseDown() {
-        Cell next;
-        switch( Type ) {
-            case Cell.Head:
-                next = Cell.Body;
-                break;
-            case Cell.Body:
-                next = Cell.Pellet;
-                break;
-            case Cell.Pellet:
-                next = Cell.Wall;
-                break;
-            case Cell.Wall:
-                next = Cell.Empty;
-                break;
-            case Cell.Empty:
-                next = Cell.Head;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-        changeTypeTo(next);
     }
 }
