@@ -17,7 +17,7 @@ public class Tile : MonoBehaviour {
     
     void Update () {}
 
-    public void changeTypeTo( Cell cell, bool animate ) {
+    public void changeTypeTo( Cell cell, bool animate = true ) {
         if ( animate ) { 
             StopAllCoroutines();
             StartCoroutine( changeTypeCoroutine( cell ) );

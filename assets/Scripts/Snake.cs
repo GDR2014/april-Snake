@@ -51,11 +51,11 @@ namespace Assets.Scripts {
             Tile newHead = world[headPos];
             snakeSegments.Enqueue( newHead );
             oldHead.changeTypeTo(Cell.Body, false);
-            newHead.changeTypeTo(Cell.Head, true);
+            newHead.changeTypeTo(Cell.Head);
             bool shouldGrow = snakeSegments.Count < supposedSize;
             if( shouldGrow ) return;
             Tile tail = snakeSegments.Dequeue();
-            tail.changeTypeTo(Cell.Empty, true);
+            tail.changeTypeTo(Cell.Empty);
         }
 
         private Cell checkNewHeadPosition() {
@@ -73,8 +73,7 @@ namespace Assets.Scripts {
                 case Cell.Wall:
                     return false;
                 case Cell.Pellet:
-                    world.GameManager.Score++;
-                    world.GameManager.StepDelay = world.GameManager.StepDelay - 0.05f < world.GameManager.MinDelay ? world.GameManager.MinDelay : world.GameManager.StepDelay - 0.05f; // TODO: Fix this.
+                    eatPellet();
                     break;
                 case Cell.Empty:
                     break;
@@ -86,6 +85,13 @@ namespace Assets.Scripts {
 
         private bool isDirectionVertical( Direction dir ) {
             return dir == Direction.UP || dir == Direction.DOWN;
+        }
+
+        private void eatPellet() {
+            world.GameManager.Score++;
+            world.GameManager.StepDelay = world.GameManager.StepDelay - 0.02f < world.GameManager.MinDelay ? world.GameManager.MinDelay : world.GameManager.StepDelay - 0.02f; // TODO: Fix this.
+            supposedSize++;
+            world.GameManager.shouldSpawnPellet = true;
         }
     }
 

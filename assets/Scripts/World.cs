@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class World : MonoBehaviour {
 
@@ -51,12 +52,14 @@ public class World : MonoBehaviour {
                 grid[row][col] = tile;
             }
         }
+        this[StartPos].renderer.material.color = GameProperties.COLOR_CELL_HEAD;
         Player = new Snake( StartPos, StartDir, StartSize, this );
         Steppers.Add( Player );
         StartCoroutine( StepRoutine() );
     }
 
     private void Update() {
+        if ( !GameManager.isGameOver && !GameManager.shouldStep && Input.anyKeyDown ) GameManager.shouldStep = true;
         // The world really shouldn't move the player, but bleh...
         if ( Input.GetKeyDown( KeyCode.W ) ) turn(Snake.Direction.UP);
         if ( Input.GetKeyDown( KeyCode.S ) ) turn( Snake.Direction.DOWN );
@@ -66,7 +69,6 @@ public class World : MonoBehaviour {
 
     private void turn( Snake.Direction dir ) {
         bool hasTurned = Player.TurnTo(dir);
-        Debug.Log("Should turn? " + hasTurned);
         if( !hasTurned ) return;
         StopAllCoroutines();
         NotifySteppers();
@@ -75,7 +77,8 @@ public class World : MonoBehaviour {
 
     public IEnumerator StepRoutine() {
         yield return new WaitForSeconds( GameManager.StepDelay );
-        NotifySteppers();
+        if(GameManager.shouldStep) NotifySteppers();
+        spawnPellet();
         StartCoroutine( StepRoutine() );
     } 
 
@@ -86,5 +89,19 @@ public class World : MonoBehaviour {
     public void NotifySteppers() {
         for( int i = 0; i < Steppers.Count; i++ )
             Steppers[i].OnStep(this);
+    }
+
+    private void spawnPellet() {
+        if( !GameManager.shouldSpawnPellet ) return;
+        GameManager.shouldSpawnPellet = false;
+        List<Tile> emptyTiles = new List<Tile>();
+        for( int row = 0; row < grid.Length; row++ ) {
+            for( int col = 0; col < grid[row].Length; col++ ) {
+                Tile t = this[row, col];
+                if( t.Type == Cell.Empty ) emptyTiles.Add(t);
+            }
+        }
+        int idx = Random.Range( 0, emptyTiles.Count );
+        emptyTiles[idx].changeTypeTo(Cell.Pellet);
     }
 }
