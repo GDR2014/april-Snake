@@ -20,6 +20,7 @@ namespace Assets.Scripts {
             snakeSegments = new Queue<Tile>();
             headPos = startPos;
             snakeSegments.Enqueue(world[headPos]);
+            world[headPos].changeTypeTo(Cell.Head);
             supposedSize = startSize;
             nextDirection = currentDirection = startDir;
             this.world = world;
@@ -46,12 +47,15 @@ namespace Assets.Scripts {
             Cell cellAtHead = checkNewHeadPosition();
             Debug.Log(cellAtHead);
             bool isGameOver = !handleNewCell(cellAtHead);
-            if( isGameOver ) { world.GameManager.GameOver(world, previousPosition); return;}
+            if( isGameOver ) {
+                world.GameManager.GameOver(world, previousPosition); 
+                return;
+            }
             Tile oldHead = world[previousPosition];
             Tile newHead = world[headPos];
             snakeSegments.Enqueue( newHead );
             oldHead.changeTypeTo(Cell.Body, false);
-            newHead.changeTypeTo(Cell.Head);
+            newHead.changeTypeTo(Cell.Head, false);
             bool shouldGrow = snakeSegments.Count < supposedSize;
             if( shouldGrow ) return;
             Tile tail = snakeSegments.Dequeue();
@@ -68,7 +72,6 @@ namespace Assets.Scripts {
         private bool handleNewCell( Cell c ) {
             switch( c ) {
                 case Cell.Head:
-                    return true;
                 case Cell.Body:
                 case Cell.Wall:
                     return false;

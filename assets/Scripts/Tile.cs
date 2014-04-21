@@ -8,7 +8,7 @@ using UnityEngine;
 public class Tile : MonoBehaviour {
 
     public Cell Type;
-    public Vector3 StartSize;
+    public static Vector3 StartSize;
 
     void Start() {
         StartSize = transform.localScale;

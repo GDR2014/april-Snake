@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour {
 
     public bool shouldSpawnPellet = true;
     public bool shouldStep = false;
+    public bool shouldSkip = false;
     public bool isGameOver = false;
 
     void Start () {}

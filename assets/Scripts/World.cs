@@ -52,15 +52,15 @@ public class World : MonoBehaviour {
                 grid[row][col] = tile;
             }
         }
-        this[StartPos].renderer.material.color = GameProperties.COLOR_CELL_HEAD;
         Player = new Snake( StartPos, StartDir, StartSize, this );
         Steppers.Add( Player );
-        StartCoroutine( StepRoutine() );
+        startStepping();
     }
 
     private void Update() {
         if ( !GameManager.isGameOver && !GameManager.shouldStep && Input.anyKeyDown ) GameManager.shouldStep = true;
         // The world really shouldn't move the player, but bleh...
+        if( GameManager.isGameOver ) return;
         if ( Input.GetKeyDown( KeyCode.W ) ) turn(Snake.Direction.UP);
         if ( Input.GetKeyDown( KeyCode.S ) ) turn( Snake.Direction.DOWN );
         if ( Input.GetKeyDown( KeyCode.A ) ) turn( Snake.Direction.LEFT );
@@ -70,16 +70,16 @@ public class World : MonoBehaviour {
     private void turn( Snake.Direction dir ) {
         bool hasTurned = Player.TurnTo(dir);
         if( !hasTurned ) return;
-        StopAllCoroutines();
+        stopStepping();
         NotifySteppers();
-        StartCoroutine( StepRoutine() );
+        startStepping();
     }
 
     public IEnumerator StepRoutine() {
         yield return new WaitForSeconds( GameManager.StepDelay );
         if(GameManager.shouldStep) NotifySteppers();
         spawnPellet();
-        StartCoroutine( StepRoutine() );
+        startStepping();
     } 
 
     public interface IWorldStepper {
@@ -103,5 +103,13 @@ public class World : MonoBehaviour {
         }
         int idx = Random.Range( 0, emptyTiles.Count );
         emptyTiles[idx].changeTypeTo(Cell.Pellet);
+    }
+
+    private void startStepping() {
+        StartCoroutine( "StepRoutine" );
+    }
+
+    private void stopStepping() {
+        StopCoroutine("StepRoutine");
     }
 }
