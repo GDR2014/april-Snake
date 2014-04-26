@@ -91,7 +91,7 @@ namespace Assets.Scripts {
 
         private void eatPellet() {
             world.GameManager.Score++;
-            world.GameManager.StepDelay = world.GameManager.StepDelay - 0.02f < world.GameManager.MinDelay ? world.GameManager.MinDelay : world.GameManager.StepDelay - 0.02f; // TODO: Fix this.
+            world.GameManager.StepDelay = world.GameManager.StepDelay * .9f < world.GameManager.MinDelay ? world.GameManager.MinDelay : world.GameManager.StepDelay * .9f; // TODO: Fix this.
             supposedSize++;
             world.GameManager.shouldSpawnPellet = true;
         }

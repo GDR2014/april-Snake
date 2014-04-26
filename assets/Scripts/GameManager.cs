@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using System.Security.Policy;
+using UnityEngine;
 
 public class GameManager : MonoBehaviour {
 
     public float MinDelay = .15f, MaxDelay = 1.5f;
-    public float StepDelay = 1.0f;
+    public float StepDelay = 1.2f;
 
     private int _score;
     public int Score{ 
@@ -14,16 +15,35 @@ public class GameManager : MonoBehaviour {
         }
     }
 
+    private int _highScore;
+    public int HighScore {
+        get { return _highScore; }
+        set {
+            _highScore = value;
+            HighScoreText.text = "Best: " + _highScore;
+            PlayerPrefs.SetInt( "highscore", value );
+        }
+    }
+
     public GUIText ScoreText;
+    public GUIText HighScoreText;
 
     public bool shouldSpawnPellet = true;
     public bool shouldStep = false;
     public bool shouldSkip = false;
     public bool isGameOver = false;
 
+    void Start() {
+        HighScore = PlayerPrefs.GetInt( "highscore" );
+    }
+
     public void GameOver( World world, Vector2 collisionPoint ) {
         isGameOver = true;
         shouldStep = false;
         world[collisionPoint].renderer.material.color = Color.red;
+        Debug.Log( "Score: " + _score );
+        Debug.Log("Best: " + _highScore);
+        if( Score > HighScore ) HighScore = Score;
+        Debug.Log("Highscore after: " + _highScore);
     }
 }
