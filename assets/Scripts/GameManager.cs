@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour {
 
     public bool shouldSpawnPellet = true;
     public bool shouldStep = false;
-    public bool shouldSkip = false;
+    public bool shouldSkip = true;
     public bool isGameOver = false;
 
     void Start() {
@@ -41,9 +41,6 @@ public class GameManager : MonoBehaviour {
         isGameOver = true;
         shouldStep = false;
         world[collisionPoint].renderer.material.color = Color.red;
-        Debug.Log( "Score: " + _score );
-        Debug.Log("Best: " + _highScore);
         if( Score > HighScore ) HighScore = Score;
-        Debug.Log("Highscore after: " + _highScore);
     }
 }

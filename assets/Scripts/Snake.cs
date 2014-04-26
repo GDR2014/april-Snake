@@ -36,20 +36,25 @@ namespace Assets.Scripts {
 
         public void OnStep( World world ) {
             currentDirection = nextDirection;
+            Vector2 newHeadPos = headPos;
             Vector2 previousPosition = headPos;
             switch( currentDirection ) {
-                case Direction.UP:    headPos.y--; break;
-                case Direction.DOWN:  headPos.y++; break;
-                case Direction.LEFT:  headPos.x--; break;
-                case Direction.RIGHT: headPos.x++; break;
+                case Direction.UP:    newHeadPos.y--; break;
+                case Direction.DOWN: newHeadPos.y++; break;
+                case Direction.LEFT: newHeadPos.x--; break;
+                case Direction.RIGHT: newHeadPos.x++; break;
                 default: throw new ArgumentOutOfRangeException();
             }
-            Cell cellAtHead = checkNewHeadPosition();
+            Cell cellAtHead = checkNewHeadPosition( newHeadPos );
             bool isGameOver = !handleNewCell(cellAtHead);
+            if( isGameOver && world.GameManager.shouldSkip ) {
+                world.GameManager.shouldSkip = false; return;}
             if( isGameOver ) {
                 world.GameManager.GameOver(world, previousPosition); 
                 return;
             }
+            headPos = newHeadPos;
+            world.GameManager.shouldSkip = true;
             Tile oldHead = world[previousPosition];
             Tile newHead = world[headPos];
             snakeSegments.Enqueue( newHead );
@@ -61,7 +66,7 @@ namespace Assets.Scripts {
             tail.changeTypeTo(Cell.Empty);
         }
 
-        private Cell checkNewHeadPosition() {
+        private Cell checkNewHeadPosition(Vector2 headPos) {
             if( headPos.x < 0 || headPos.x >= world.width
                || headPos.y < 0 || headPos.y >= world.height) return Cell.Wall;
             return world[headPos].Type;
