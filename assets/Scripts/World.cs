@@ -19,6 +19,9 @@ public class World : MonoBehaviour {
     public Tile tilePrefab;
     public Vector2 tileSpacing = new Vector2(0,0);
 
+    public Vector3 postInitPosition = new Vector3(0,0,0);
+    public Vector3 postInitScale = new Vector3(1,1,1);
+
     public int width, height;
     private Tile[][] grid;
     public Tile this[ int x, int y ] {
@@ -33,13 +36,21 @@ public class World : MonoBehaviour {
     }
 
     private void Start() {
+        initializeGrid();
+        this.transform.position = postInitPosition;
+        this.transform.localScale = postInitScale;
+        Player = new Snake( StartPos, StartDir, StartSize, this );
+        Steppers.Add( Player );
+        startStepping();
+    }
+
+    private void initializeGrid() {
         Vector3 cellDimension = tilePrefab.transform.localScale;
         float offsetX = cellDimension.x + tileSpacing.x;
         float offsetY = cellDimension.y + tileSpacing.y;
-        float initialX = (-width  / 2.0f) * offsetX + offsetX/2; // Minus
-        float initialY = (+height / 2.0f) * offsetY - offsetY/2; // Plus
+        float initialX = ( -width / 2.0f ) * offsetX + offsetX / 2; // Minus
+        float initialY = ( +height / 2.0f ) * offsetY - offsetY / 2; // Plus
         grid = new Tile[height][];
-        Debug.Log( "Grid initialized!" );
         for( int row = 0; row < grid.Length; row++ ) {
             grid[row] = new Tile[width];
             for( int col = 0; col < grid[row].Length; col++ ) {
@@ -52,22 +63,19 @@ public class World : MonoBehaviour {
                 grid[row][col] = tile;
             }
         }
-        Player = new Snake( StartPos, StartDir, StartSize, this );
-        Steppers.Add( Player );
-        startStepping();
     }
 
     private void Update() {
         if ( !GameManager.isGameOver && !GameManager.shouldStep && Input.anyKeyDown ) GameManager.shouldStep = true;
         // The world really shouldn't move the player, but bleh...
-        if( GameManager.isGameOver ) return;
-        if ( Input.GetKeyDown( KeyCode.W ) ) turn(Snake.Direction.UP);
-        if ( Input.GetKeyDown( KeyCode.S ) ) turn( Snake.Direction.DOWN );
-        if ( Input.GetKeyDown( KeyCode.A ) ) turn( Snake.Direction.LEFT );
-        if ( Input.GetKeyDown( KeyCode.D ) ) turn( Snake.Direction.RIGHT );
+        if ( Input.GetKeyDown( KeyCode.W ) ) turnPlayer(Snake.Direction.UP);
+        if ( Input.GetKeyDown( KeyCode.S ) ) turnPlayer( Snake.Direction.DOWN );
+        if ( Input.GetKeyDown( KeyCode.A ) ) turnPlayer( Snake.Direction.LEFT );
+        if ( Input.GetKeyDown( KeyCode.D ) ) turnPlayer( Snake.Direction.RIGHT );
     }
 
-    private void turn( Snake.Direction dir ) {
+    public void turnPlayer( Snake.Direction dir ) {
+        if( GameManager.isGameOver ) return;
         bool hasTurned = Player.TurnTo(dir);
         if( !hasTurned ) return;
         stopStepping();

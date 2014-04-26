@@ -45,7 +45,6 @@ namespace Assets.Scripts {
                 default: throw new ArgumentOutOfRangeException();
             }
             Cell cellAtHead = checkNewHeadPosition();
-            Debug.Log(cellAtHead);
             bool isGameOver = !handleNewCell(cellAtHead);
             if( isGameOver ) {
                 world.GameManager.GameOver(world, previousPosition); 
